@@ -1,53 +1,27 @@
 <head><version>2.50.21</version></head>
 <Set_Variable>
-  <set_1_once>TRUE</set_1_once>
-  <set_3_array>FALSE</set_3_array>
-  <set_3_once>FALSE</set_3_once>
-  <value_1>1500</value_1>
-  <set_1_array>FALSE</set_1_array>
-  <variable_2>TILT_SERVO</variable_2>
-  <set_4_once>FALSE</set_4_once>
-  <set_2_once>TRUE</set_2_once>
-  <value_2>1500</value_2>
   <set_2_array>FALSE</set_2_array>
   <set_4_array>FALSE</set_4_array>
+  <set_1_array>FALSE</set_1_array>
+  <value_1>1500</value_1>
+  <set_2_once>TRUE</set_2_once>
+  <set_3_once>TRUE</set_3_once>
+  <set_4_once>FALSE</set_4_once>
   <variable_1>PAN_SERVO</variable_1>
+  <value_2>1500</value_2>
+  <variable_2>TILT_SERVO</variable_2>
+  <set_1_once>TRUE</set_1_once>
+  <set_3_array>FALSE</set_3_array>
+  <value_3>0</value_3>
+  <variable_3>LASER</variable_3>
 </Set_Variable>
-<RGB_Filter disabled>
-  <channel>1</channel>
-  <max_value>30</max_value>
-  <hysteresis>0</hysteresis>
-  <min_value>20</min_value>
-  <hue_value>130</hue_value>
-</RGB_Filter>
-<Blob_Size disabled>
-  <cutoff>30</cutoff>
-  <limit>1</limit>
-  <min_area>50</min_area>
-  <treat_as_color_image>FALSE</treat_as_color_image>
-  <object_size>10</object_size>
-  <mask>FALSE</mask>
-  <threshold>5</threshold>
-  <max_area>0</max_area>
-</Blob_Size>
-<Center_of_Gravity disabled>
-  <show_coord>TRUE</show_coord>
-  <display_as_annotation>TRUE</display_as_annotation>
-  <color_index>2</color_index>
-  <connect_line>FALSE</connect_line>
-  <density>1</density>
-  <use_subpixel>FALSE</use_subpixel>
-  <show_box>TRUE</show_box>
-  <box_size>5</box_size>
-  <overlay_image>Source</overlay_image>
-  <show_cog>TRUE</show_cog>
-</Center_of_Gravity>
 <VBScript_Program>
   <script>midx = GetVariable("IMAGE_WIDTH") / 2
 midy = GetVariable("IMAGE_HEIGHT") / 2
 
 pan = GetVariable("PAN_SERVO")
 tilt = GetVariable("TILT_SERVO")
+laser = GetVariable("LASER")
 
 range = 5
 
@@ -55,33 +29,28 @@ horizFactor = 400 / midx
 
 vertFactor = 400 / midy
 
-faces = GetArrayVariable("FACES")
 
 
 size = GetVariable("COG_BOX_SIZE")
 
 
-  cogX = GetVariable("COG_X")
-faces = GetArrayVariable("OBJECTS")
-
-
-
-if isArray(faces) then
-  if ubound(faces) &gt; 0 then
-
+objects = GetArrayVariable("OBJECTS")
+laser = 0
+if isArray(objects) then
+  if ubound(objects) &gt; 0 then
+	laser = 1
 					
 
-  if faces(9) &lt; midx - range then
-    pan = pan+(midx-faces(9))/horizFactor
-  elseif faces(9)&gt; midx + range then
-    pan = pan-(faces(9)-midx)/horizFactor
+  if objects(9) &lt; midx - range then
+    pan = pan+(midx-objects(9))/horizFactor
+  elseif objects(9)&gt; midx + range then
+    pan = pan-(objects(9)-midx)/horizFactor
   end if
 
-  cogY = GetVariable("COG_Y")
-  if faces(10)&lt; midy - range then
-    tilt = tilt-(midy-faces(10))/vertFactor
-  elseif faces(10)&gt; midy + range then
-    tilt = tilt+(faces(10)-midy)/vertFactor
+  if objects(10)&lt; midy - range then
+    tilt = tilt-(midy-objects(10))/vertFactor
+  elseif objects(10)&gt; midy + range then
+    tilt = tilt+(objects(10)-midy)/vertFactor
   end if
 
   if pan &gt; 2500 then pan = 2500
@@ -93,17 +62,23 @@ if isArray(faces) then
   SetVariable "TILT_SERVO", tilt
 
   end if
-end if</script>
+else  
+
+end if
+
+SetVariable "LASER", laser</script>
   <source_mode>gui</source_mode>
 </VBScript_Program>
 <Sparkfun_Arduino>
   <servo_4_min>500</servo_4_min>
   <dio_pin9_is_input>FALSE</dio_pin9_is_input>
   <enable_digital_4>FALSE</enable_digital_4>
+  <dio_pin2_map>LASER</dio_pin2_map>
   <dio_pin6_bit>-1</dio_pin6_bit>
   <servo_3_max>2500</servo_3_max>
-  <TILT_SERVO>500</TILT_SERVO>
+  <TILT_SERVO>1327</TILT_SERVO>
   <enable_digital_5>FALSE</enable_digital_5>
+  <tab_selected>3</tab_selected>
   <dio_pin2_value>FALSE</dio_pin2_value>
   <servo_2_max>2500</servo_2_max>
   <dio_pin10_value>FALSE</dio_pin10_value>
@@ -120,7 +95,7 @@ end if</script>
   <dio_pin7_is_input>FALSE</dio_pin7_is_input>
   <dio_pin8_bit>-1</dio_pin8_bit>
   <dio_pin8_value>FALSE</dio_pin8_value>
-  <servo_6_value>1327</servo_6_value>
+  <servo_6_value>1493</servo_6_value>
   <dio_pin7_value>FALSE</dio_pin7_value>
   <dio_pin10_is_input>FALSE</dio_pin10_is_input>
   <dio_pin12_is_input>FALSE</dio_pin12_is_input>
@@ -174,7 +149,7 @@ end if</script>
   <enable_digital_12>FALSE</enable_digital_12>
   <enable_analog_input_6>FALSE</enable_analog_input_6>
   <com_port>COM157 - USB Serial Port</com_port>
-  <servo_5_value>1604</servo_5_value>
+  <servo_5_value>1427</servo_5_value>
   <dio_pin3_bit>-1</dio_pin3_bit>
   <enable_digital_13>FALSE</enable_digital_13>
   <dio_pin5_bit>-1</dio_pin5_bit>
@@ -185,7 +160,7 @@ end if</script>
   <enable_digital_10>FALSE</enable_digital_10>
   <servo_1_max>2500</servo_1_max>
   <dio_pin11_bit>-1</dio_pin11_bit>
-  <enable_digital_2>FALSE</enable_digital_2>
+  <enable_digital_2>TRUE</enable_digital_2>
   <dio_pin6_is_input>FALSE</dio_pin6_is_input>
   <analog_value_output_4>0</analog_value_output_4>
   <dio_pin2_is_input>FALSE</dio_pin2_is_input>
@@ -193,7 +168,7 @@ end if</script>
   <enable_digital_11>FALSE</enable_digital_11>
   <servo_5_trim>0</servo_5_trim>
   <dio_pin2_bit>-1</dio_pin2_bit>
-  <PAN_SERVO>500</PAN_SERVO>
+  <PAN_SERVO>1604</PAN_SERVO>
   <servo_4_max>2500</servo_4_max>
   <dio_pin13_is_input>FALSE</dio_pin13_is_input>
   <enable_digital_3>FALSE</enable_digital_3>
@@ -204,7 +179,7 @@ end if</script>
 <Object_Recognition>
   <select_top_objects>0</select_top_objects>
   <max_angle>360</max_angle>
-  <create_shape_array>FALSE</create_shape_array>
+  <create_shape_array>TRUE</create_shape_array>
   <monitor_folder>FALSE</monitor_folder>
   <absent_after_frames>0</absent_after_frames>
   <display_filename>TRUE</display_filename>
@@ -215,7 +190,7 @@ end if</script>
   <min_angle>0</min_angle>
   <sort_array_on_y>FALSE</sort_array_on_y>
   <font_size_index>2</font_size_index>
-  <enable_tracking>TRUE</enable_tracking>
+  <enable_tracking>FALSE</enable_tracking>
   <base_folder>C:\Program Files (x86)\RoboRealm\Objects\</base_folder>
   <display_ty>FALSE</display_ty>
   <display_orientation>FALSE</display_orientation>

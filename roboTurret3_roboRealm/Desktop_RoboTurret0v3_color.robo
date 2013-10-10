@@ -1,20 +1,22 @@
 <head><version>2.50.21</version></head>
 <Set_Variable>
-  <set_1_once>TRUE</set_1_once>
-  <set_3_array>FALSE</set_3_array>
-  <set_3_once>FALSE</set_3_once>
-  <value_1>1500</value_1>
-  <set_1_array>FALSE</set_1_array>
-  <variable_2>TILT_SERVO</variable_2>
-  <set_4_once>FALSE</set_4_once>
-  <set_2_once>TRUE</set_2_once>
-  <value_2>1500</value_2>
   <set_2_array>FALSE</set_2_array>
   <set_4_array>FALSE</set_4_array>
+  <set_1_array>FALSE</set_1_array>
+  <value_1>1500</value_1>
+  <set_2_once>TRUE</set_2_once>
+  <set_3_once>TRUE</set_3_once>
+  <set_4_once>FALSE</set_4_once>
   <variable_1>PAN_SERVO</variable_1>
+  <value_2>1500</value_2>
+  <variable_2>TILT_SERVO</variable_2>
+  <set_1_once>TRUE</set_1_once>
+  <set_3_array>FALSE</set_3_array>
+  <value_3>0</value_3>
+  <variable_3>LASER</variable_3>
 </Set_Variable>
 <RGB_Filter>
-  <channel>1</channel>
+  <channel>4</channel>
   <max_value>30</max_value>
   <hysteresis>0</hysteresis>
   <min_value>20</min_value>
@@ -48,6 +50,7 @@ midy = GetVariable("IMAGE_HEIGHT") / 2
 
 pan = GetVariable("PAN_SERVO")
 tilt = GetVariable("TILT_SERVO")
+laser = GetVariable("LASER")
 
 range = 5
 
@@ -58,6 +61,7 @@ vertFactor = 400 / midy
 size = GetVariable("COG_BOX_SIZE")
 if size &gt; 10 then
 
+	laser = 1
   cogX = GetVariable("COG_X")
 
   if cogX &lt; midx - range then
@@ -80,9 +84,10 @@ if size &gt; 10 then
 
   SetVariable "PAN_SERVO", pan
   SetVariable "TILT_SERVO", tilt
-
+else
+	laser = 0
 end if
-
+  SetVariable "LASER", laser
 </script>
   <source_mode>gui</source_mode>
 </VBScript_Program>
@@ -90,10 +95,12 @@ end if
   <servo_4_min>500</servo_4_min>
   <dio_pin9_is_input>FALSE</dio_pin9_is_input>
   <enable_digital_4>FALSE</enable_digital_4>
+  <dio_pin2_map>LASER</dio_pin2_map>
   <dio_pin6_bit>-1</dio_pin6_bit>
   <servo_3_max>2500</servo_3_max>
-  <TILT_SERVO>500</TILT_SERVO>
+  <tab_selected>3</tab_selected>
   <enable_digital_5>FALSE</enable_digital_5>
+  <TILT_SERVO>500</TILT_SERVO>
   <dio_pin2_value>FALSE</dio_pin2_value>
   <servo_2_max>2500</servo_2_max>
   <dio_pin10_value>FALSE</dio_pin10_value>
@@ -110,7 +117,7 @@ end if
   <dio_pin7_is_input>FALSE</dio_pin7_is_input>
   <dio_pin8_bit>-1</dio_pin8_bit>
   <dio_pin8_value>FALSE</dio_pin8_value>
-  <servo_6_value>1326</servo_6_value>
+  <servo_6_value>500</servo_6_value>
   <dio_pin7_value>FALSE</dio_pin7_value>
   <dio_pin10_is_input>FALSE</dio_pin10_is_input>
   <dio_pin12_is_input>FALSE</dio_pin12_is_input>
@@ -164,7 +171,7 @@ end if
   <enable_digital_12>FALSE</enable_digital_12>
   <enable_analog_input_6>FALSE</enable_analog_input_6>
   <com_port>COM157 - USB Serial Port</com_port>
-  <servo_5_value>1329</servo_5_value>
+  <servo_5_value>1472</servo_5_value>
   <dio_pin3_bit>-1</dio_pin3_bit>
   <enable_digital_13>FALSE</enable_digital_13>
   <dio_pin5_bit>-1</dio_pin5_bit>
@@ -175,15 +182,14 @@ end if
   <enable_digital_10>FALSE</enable_digital_10>
   <servo_1_max>2500</servo_1_max>
   <dio_pin11_bit>-1</dio_pin11_bit>
-  <enable_digital_2>FALSE</enable_digital_2>
+  <enable_digital_2>TRUE</enable_digital_2>
   <dio_pin6_is_input>FALSE</dio_pin6_is_input>
   <analog_value_output_4>0</analog_value_output_4>
   <dio_pin2_is_input>FALSE</dio_pin2_is_input>
   <baud_index>9</baud_index>
   <enable_digital_11>FALSE</enable_digital_11>
   <servo_5_trim>0</servo_5_trim>
-  <dio_pin2_bit>-1</dio_pin2_bit>
-  <PAN_SERVO>500</PAN_SERVO>
+  <PAN_SERVO>1472</PAN_SERVO>
   <servo_4_max>2500</servo_4_max>
   <dio_pin13_is_input>FALSE</dio_pin13_is_input>
   <enable_digital_3>FALSE</enable_digital_3>
