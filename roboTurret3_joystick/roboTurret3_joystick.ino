@@ -84,8 +84,8 @@ void setup()
   //Analog pins do not need to be initialized
   
   //write initial servo positions to set the servos to 'home'
-  panServo.write(panValue);  //sets the pan servo position to the default 'home' value
-  tiltServo.write(tiltValue);//sets the tilt servo position to the default 'home' value
+  panServo.writeMicroseconds(panValue);  //sets the pan servo position to the default 'home' value
+  tiltServo.writeMicroseconds(tiltValue);//sets the tilt servo position to the default 'home' value
   
 } 
 
