@@ -13,7 +13,7 @@
 #include <Servo.h> 
 
 Servo servos[12];
-boolean pinModes[14];
+unsigned char pinModes[14];
 
 unsigned int crc;
 unsigned int command;
