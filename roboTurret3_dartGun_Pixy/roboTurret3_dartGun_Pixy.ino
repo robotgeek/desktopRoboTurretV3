@@ -1,8 +1,10 @@
+
+
 /***********************************************************************************
  *
  *      __                 RobotGeek Foam Dart Gun 
- *       \_____                with Desktop RobotTurret and Pixy
- *       |      |          
+ *       \______           with Desktop RobotTurret and Pixy
+ *       | \\   ||=o         
  *       |______|=    =====>
  *         |  | 
  *        _|__|
@@ -11,14 +13,20 @@
  *  _|___|_______|_
  * 
  *  The following sketch will activate a single servo to fire the foam dart gun
- *  whenver a pushbutton is pressed.
+ *  when the Pixy has identified and centered on a target.
  *
- *  ###ADD PIXY CONNECTIONS
- *  DIO 9 - Black RobotGeek 180 Degree Servo  White -'S' Black -'G'
+ *  GND    - Pixy Black Wire
+ *  VCC 5V - Pixy Red Wire
+ *  DIO  3 - Trigger Servo (RobotGeek 180 Servo)
+ *  DIO  5 - Pan Servo (RobotGeek 180 Servo)
+ *  DIO  6 - Tilt Servo (RobotGeek 180 Servo)
+ *  DIO 10 - OPTIONAL: RobotGeek Laser  White -'S' Black -'G'
+ *  DIO 11 - Pixy Yellow Wire
+ *  DIO 12 - Pixy Brown Wire
+ *  DIO 13 - Pixy Orange Wire
  *  
- *  Use an external power supply and set the jumper for pins 9/10/11 to 'VIN'
+ *  Use an external power supply and set the jumper for pins 3/5/6 to 'VIN', 9/10/11 to '5V'
  *   
- * This code is designed for a bare pushbutton and uses internal pullup resistors. 
  *
  *  For more information and wiring diagrams see
  *  http://learn.robotgeek.com/getting-started/29-desktop-roboturret/159-robotgeek-foam-dart-gun-getting-started-guide.html
@@ -31,14 +39,13 @@
 Pixy pixy;    //create the pixy class
 
 //Constant variables - these all use 'const' because they will not change during the program operation, allowing us to save RAM
-const int TRIGGER_PIN = 3;  //Triffer Servo Digital Pin
+const int TRIGGER_PIN = 3;  //Trigger Servo Digital Pin
 const int PAN_PIN = 5;      //Pan Servo Digital Pin
 const int TILT_PIN = 6;     //Tilt Servo Digital Pin
-const int LASER_PIN = 2     //Laser Digital Pin
+const int LASER_PIN = 10;     //Laser Digital Pin
 
 //max/min puse values in microseconds to send to the servo
-//###FIRE_POSITION needs to change to microseconds
-const int FIRE_POSITION = 113 //default position the servo will move to in order to fire the dar gun  
+const int FIRE_POSITION = 1870; //default position in microseconds the servo will move to in order to fire the dart gun  
 const int PAN_MIN = 600;  //full counterclockwise for RobotGeek 180 degree servo
 const int PAN_MAX = 2400; //full clockwise for RobotGeek 180 degree servo
 const int TILT_MIN = 600;     //full counterclockwise for RobotGeek 180 degree servo
@@ -53,6 +60,7 @@ Servo panServo, tiltServo, triggerServo;  // create servo objects to control the
 
 int panValue = 1500;   //current positional value being sent to the pan servo. 
 int tiltValue = 1500;  //current positional value being sent to the tilt servo. 
+int triggerValue = 1500;  //current positional value being sent to the tilt servo. 
 
 int laserState = LOW;         //The current state of the laser module
 
@@ -61,7 +69,7 @@ int pixyCenterX;        //x coordinate of the block, centered
 long pixySize;          //size of the block
 long lastSeen;          //last time the pixy block was located
 long trackStartTime;    //time that tracking started 
-bool tracking = 0;      //whether or not the code is currently tracking an object
+bool tracking = false;      //whether or not the code is currently tracking an object
 bool shots = 1;         //number of shots remaing - by default 1 for the foam dart gun
 
 //setup servo objects and set initial position
@@ -80,9 +88,10 @@ void setup()
   //write initial servo positions to set the servos to 'home'
   panServo.writeMicroseconds(panValue);  //sets the pan servo position to the default 'home' value
   tiltServo.writeMicroseconds(tiltValue);//sets the tilt servo position to the default 'home' value
-  //### change to microseconds
-  triggerServo.write(90);        //sets the servo position to 90 degress, centered
+  triggerServo.writeMicroseconds(triggerValue);  //sets the servo position to 90 degress, centered, 'home' value
   Serial.begin(9600);
+  Serial.print("Starting...\n");
+  pixy.init();
 }
  
  
@@ -98,12 +107,12 @@ void loop()
   {
     lastSeen = millis();  //a block has been 'seen' so record the time
    
-    //if the code wasnt' tracking before
+    //if the code wasn't tracking before
     if(tracking == false)
     {
       trackStartTime = lastSeen;  //record tracking time start - this will be the same as lastSeen right now, but lastSeen will keep updated
       tracking = true;               //turn tracking flag on
-      Serial.println("Start Tracking! Time"");
+      Serial.println("Start Tracking! Time");
       Serial.println(trackStartTime);
     }
     
@@ -111,8 +120,8 @@ void loop()
     pixyCenterY = pixy.blocks[0].y - 100; //get y data (0-200) and center it by subtracting 100. Values 0-99 (down) will be negative while values 101-200 (up) will be positive. This will help in tracking objects
     pixySize = pixy.blocks[0].height *  pixy.blocks[0].width; //get the relative size of the object by multiplying width * height
   
-    panValue = panValue - pixyCenterX/speed;
-    tiltValue = tiltValue - pixyCenterY/speed; 
+    panValue = panValue + pixyCenterX/speed;
+    tiltValue = tiltValue + pixyCenterY/speed; 
   
      //even though the servos have min/max value built in when servo.attach() was called, the program must still keep the
      //panValue variable within the min/max bounds, or the turret may become unresponsive
@@ -131,9 +140,9 @@ void loop()
      if((millis() - trackStartTime  > TIME_BFORE_FIRE) && (shots > 0))
      {
       Serial.print("FIRE!");
-      triggerServo.write(FIRE_POSITION); // move the servo to FIRE_POSITION to fire the dart gun
+      triggerServo.writeMicroseconds(FIRE_POSITION); // move the servo to FIRE_POSITION to fire the dart gun
       delay(300);                        //wait for 300ms for servo to move
-      triggerServo.write(90);            // sets the servo position to 90 degress, centered
+      triggerServo.writeMicroseconds(triggerValue);            // sets the servo position to 90 degress, centered
       shots = shots - 1;                  //decrement the shot counter so the gun doesn't keep trying to fire
      }
      
@@ -153,9 +162,9 @@ void loop()
 //  //read the pushbutton pin. Because the code is using internal pullups, a 'LOW' signal indicated the button has been pressed
 //  if (HIGH == LOW)
 //  {  
-//    triggerServo.write(FIRE_POSITION); // move the servo to FIRE_POSITION to fire the dart gun
+//    triggerServo.writeMicroseconds(FIRE_POSITION); // move the servo to FIRE_POSITION to fire the dart gun
 //    delay(300);                        //wait for 300ms
-//    triggerServo.write(90);            // sets the servo position to 90 degress, centered
+//    triggerServo.writeMicroseconds(1500);            // sets the servo position to 90 degress, centered
 //    delay(300);                        //wait for 300ms before next possible firing attempt    
 //  }
   
