@@ -1,17 +1,23 @@
 /***********************************************************************************
- *     ______            RobotGeek Desktop RoboTurret v3         ______
- *      |  |            Direct Joystick & Button Control          |  | 
- *      |__|_                                                    _|__|
- *   ___|____|_                                                 _|___|___
- *    |       |    _                                        _   |       |
- *   _|_______|____|_                                      _|___|_______|_
+ *
+ *      __                 RobotGeek RobotTurret and Foam Dart Gun Test
+ *       \_____ 
+ *       |      |          
+ *       |______|=    =====>
+ *         |  | 
+ *        _|__|
+ *       _|___|___
+ *   _   |       |
+ *  _|___|_______|_
  * 
- *  The following sketch will allow you to control a Desktop RobotTurret v3 using
- *  the included RobotGeek Joystick and RobotGeek Pushbutton
- *    http://www.trossenrobotics.com/robotGeek-pushbutton    
- *    http://www.trossenrobotics.com/robotgeek-joystick  
+ *  The following sketch will allow you to control a Desktop RobotTurret v3 connected 
+ *  to a foam dart gun using the included RobotGeek Joystick and RobotGeek Pushbutton
+ *  
+ *  The laser module will be turned on by defualt to allow for tracking. Do not aim
+ *  the dart gun at animals or people.
  *    
  *  Wiring
+ *    Trigger Servo - Digital Pin 3
  *    Pan Servo - Digital Pin 10 
  *    Tilt Servo - Digital Pin 11 
  *    Laser - Digital Pin 2
@@ -23,7 +29,7 @@
  *  Control Behavior:
  *    The Horizontal Joystick will move the Pan Servo
  *    The Vertical Joystick will move the Tilt Servo
- *    The Pushbutton  will toggle the laser mofule on/off
+ *    The Pushbutton  will fire the dart gun
  *
  *  External Resources
  *
@@ -31,6 +37,7 @@
 //Includes
 #include <Servo.h> 
 
+//##change these to const int
 //Defines
 #define PAN_PIN 10        //Pan Servo Digital Pin
 #define TILT_PIN 11       //Tilt Servo Digital Pin
@@ -51,10 +58,12 @@
 #define PAN_MAX      2400 //full clockwise for RobotGeek 180 degree servo
 #define TILT_MIN  600     //full counterclockwise for RobotGeek 180 degree servo
 #define TILT_MAX  2400    //full clockwise for RobotGeek 180 degree servo
+//##change this to ms
+#define FIRE_POSITION 113 //default position the servo will move to in order to fire the dart gun  
 
 int speed = 10;        //alter this value to change the speed of the system. Higher values mean higher speeds 5-500 approximate recommended range
 
-Servo panServo, tiltServo;  // create servo objects to control the pan and tilt servos
+Servo panServo, tiltServo, triggerServo;  // create servo objects to control the trigger, pan and tilt servos
 
 int horizontalValue, verticalValue;            //variables to hold the last reading from the analog pins for the horizontal and vertical joystick
 int horizontalValueMapped, verticalValueMapped;//variables to hold mapped readings from the vertical values. These mapped readings will be appropriate to work with servo values
@@ -76,7 +85,10 @@ void setup()
   //initialize servos
   panServo.attach(PAN_PIN, PAN_MIN, PAN_MAX);  // attaches/activates the pan servo on pin PAN_PIN and sets lower/upper limits that can be sent to the servo
   tiltServo.attach(TILT_PIN, TILT_MIN, TILT_MAX);  // attaches/activates the tilt servo on pin TILT_PIN and sets lower/upper limits that can be sent to the servo
-
+  //##figure out max/min for trigger servo
+  triggerServo.attach(SERVOPIN); //attach the trigger servo on pin SERVOPIN
+  triggerServo.write(90);        //sets the servo position to 90 degress, centered
+  
   //initalize digital pins
   pinMode(PUSHBUTTON_PIN, INPUT);  //set the PUSHBUTTON Pin to an Input
   pinMode(LASER_PIN, OUTPUT);      //set the LASER Pin to an output
@@ -122,12 +134,13 @@ void loop()
       //check if the button's current state is HIGH(which signals the program to toggle the laser)
       if (buttonState == HIGH) 
       {
-        laserState = !laserState;  //set the laserState to the opposite of what it was set to before
+        triggerServo.write(FIRE_POSITION); // move the servo to FIRE_POSITION to fire the dart gun
+        delay(300);                        //wait for 300ms
+        triggerServo.write(90);            // sets the servo position to 90 degress, centered
+        delay(300);    
       }
     }
   }
-  digitalWrite(LASER_PIN, laserState);  // set the Laser based on the lateset laser state
-
   lastButtonState = reading;  //set the lastButtonState to the value of reading for the next loop
 
 
