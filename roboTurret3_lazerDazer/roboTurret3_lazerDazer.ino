@@ -6,49 +6,52 @@
  *    |       |    _                                        _   |       |
  *   _|_______|____|_                                      _|___|_______|_
  * 
- *  The following sketch will turn the lazer on and randomly move the pan and tilt
+ *  The following sketch will turn the laser on and randomly move the pan and tilt
  *  servos.
  *    
- *  Wiring
+ *  Wiring:
  *    Pan Servo - Digital Pin 10 
  *    Tilt Servo - Digital Pin 11 
  *    Laser - Digital Pin 2
  *   
  *  Control Behavior:
+ *    No inputs. Plug it in and it will run.
  *   
- *  External Resources
+ *  External Resources:
+ *    https://www.arduino.cc/en/Reference/Random
+ *   https://www.arduino.cc/en/Reference/RandomSeed
+ *    https://www.arduino.cc/en/Reference/Servo
  *
  ***********************************************************************************/
 //Includes
-#include <Servo.h>           //include the servo library for working with servo objects
+#include <Servo.h>          //include the servo library for working with servo objects
 
 //Defines
-#define PAN 10              //Pan Servo Digital Pin
-#define TILT 11             //Tilt Servo Digital Pin
-#define LASER 2             //Laser Digital Pin
+const int PAN = 10;         //Pan Servo Digital Pin
+const int TILT = 11;        //Tilt Servo Digital Pin
+const int LASER = 2;        //Laser Digital Pin
 
 
-#define PAN_MIN 40    // minimum pan servo range, value should be between 0 and 180 and lower than PAN_MAX
-#define PAN_MAX 140   // maximum pan servo range, value should be between 0 and 180 and more than PAN_MIN
+const int PAN_MIN = 40;     // minimum pan servo range, value should be between 0 and 180 and lower than PAN_MAX
+const int PAN_MAX = 140;    // maximum pan servo range, value should be between 0 and 180 and more than PAN_MIN
 
-#define TILT_MIN 60    // minimum tilt servo range, value should be between 0 and 180 and lower than TILT_MAX
-#define TILT_MAX 100   // maximum tilt servo range, value should be between 0 and 180 and more than TILT_MIN
+const int TILT_MIN = 60;    // minimum tilt servo range, value should be between 0 and 180 and lower than TILT_MAX
+const int TILT_MAX = 100;   // maximum tilt servo range, value should be between 0 and 180 and more than TILT_MIN
 
-#define SPEED_MIN 10    // minimum interpolation speed (less than 5 not recommended)
-#define SPEED_MAX 10    // maximum interpolation speed (Lower SPEED_MAX values mean that the program will cycle more quickly, leading to an increased occurance of pausing. Adjust ROLL_MAX accordingly)
+const int SPEED_MIN = 10;   // minimum interpolation speed (less than 5 not recommended)
+const int SPEED_MAX = 10;   // maximum interpolation speed (Lower SPEED_MAX values mean that the program will cycle more quickly, leading to an increased occurance of pausing. Adjust ROLL_MAX accordingly)
                        
-#define ROLL_MAX 40    // Roll the dice for random pause. Lower value = more frequent pauses, higher value = less frequent pauses
+const int ROLL_MAX = 40;    // Roll the dice for random pause. Lower value = more frequent pauses, higher value = less frequent pauses
 
-#define PAUSE_MIN  500  // define minimum pause length in mS. 1000 = 1 second
-#define PAUSE_MAX  1500 // define maximum pause length in mS.
+const int PAUSE_MIN = 500;  // define minimum pause length in mS. 1000 = 1 second
+const int PAUSE_MAX = 1500; // define maximum pause length in mS.
 
 
 Servo panServo, tiltServo;  // create servo objects to control the pan and tilt servos
 
-
 long dazer_speed;
 int dazer_pause_roll;
-int pause_length;
+int pause_length = 1;
 
 
 int panValue = 90;   //current positional value being sent to the pan servo. 
@@ -59,7 +62,6 @@ byte tilt_goal;
 
 //State Variables
 int laserState = LOW;         //The current state of the laser module
-int previousCbutState = 0;    // used for on/off state code for the C-Button. Z-Button state is not required
 
 //Timing variables
 long lastDebounceTime = 0;  // the last time the output pin was toggled. This variable is a 'long' because it may need to hold many milliseconds, and a 'long' will afford more space than an 'int'
@@ -81,65 +83,47 @@ void setup()
   
   randomSeed(analogRead(0));  //set a basis for the random() engine, based off of analog0 which will be a random number because nothing is attached
 
-  digitalWrite(LASER,HIGH);
+  digitalWrite(LASER, HIGH);
 } 
 
 void loop() 
 { 
+  dazer_pause_roll = random(1, ROLL_MAX);      //pick a random number between 1 and ROLL_MAX
+  pause_length = random(PAUSE_MIN, PAUSE_MAX); //pick a random number between PAUSE_MIN and PAUSE_MAX
+  delay(pause_length);                         //use the random number to pause for pause_length milliseconds
+
+  pan_goal = random(PAN_MIN, PAN_MAX);
+  tilt_goal = random(TILT_MIN, TILT_MAX);
+  dazer_speed = random(SPEED_MIN, SPEED_MAX);
+  //perfom the loop while the current positions are different from the goal positions 
+
+  //if the pan_goal is larger than the pan position, move the pan position up
+  if (pan_goal > panValue)
+  {
+    panValue = panValue++;
+  }
   
+  //if the pan_goal is smaller than the pan position, move the pan position down
+  else if (pan_goal < panValue)
+  {
+    panValue = panValue--;
+  }               
   
-    dazer_pause_roll = random(1, ROLL_MAX);//pick a random number between 1 and ROLL_MAX
-    
-    //if the number randomly picked is '1' the pause for a random time
-    if (dazer_pause_roll == 1)
-    {
-      pause_length = random(PAUSE_MIN, PAUSE_MAX);//pick a random number between PAUSE_MIN and PAUSE_MAX
-      delay(pause_length); //use the random number to pause for pause_length milliseconds
-    }
-    //other wise randomly move the servos
-    else
-    {      
-      Generate_RandomGoal();//generate a set of random goal positions for the servos
-      //perfom the loop while the current positions are different from the goal positions 
-      while(pan_goal != panValue && tilt_goal != tiltValue)
-      {
-        //if the pan_goal is larger than the pan position, move the pan position up
-        if (pan_goal > panValue)
-        {
-          panValue = panValue++;
-        }
-        //if the pan_goal is smaller than the pan position, move the pan position down
-        else if (pan_goal < panValue)
-        {
-          panValue = panValue--;
-        }               
-        
-        //if the tilt_goal is larger than the tilt position, move the pan position up
-        if (tilt_goal > tiltValue)
-        {
-          tiltValue = tiltValue++;
-        }
-        //if the tilt_goal is smaller than the tilt position, move the pan position down
-        else if (tilt_goal < tiltValue)
-        {
-          tiltValue = tiltValue--;
-        }
-        
+  //if the tilt_goal is larger than the tilt position, move the pan position up
+  if (tilt_goal > tiltValue)
+  {
+    tiltValue = tiltValue++;
+  }
+  //if the tilt_goal is smaller than the tilt position, move the pan position down
+  else if (tilt_goal < tiltValue)
+  {
+    tiltValue = tiltValue--;
+  }    
   
-      panServo.write(panValue);                    // sets the servo position according to the scaled value 
-      tiltServo.write(tiltValue);                  // sets the servo position according to the scaled value 
-      delay(dazer_speed);                          // waits for a random delay before the next loop
-    }//end while loop
-  }//end else   
+  panServo.write(pan_goal);                    // sets the servo position according to the scaled value 
+  tiltServo.write(tilt_goal);                  // sets the servo position according to the scaled value 
+  delay(dazer_speed);                          // waits for a random delay before the next loop
 } //end loop()
-
-
-void Generate_RandomGoal()
-{
-      pan_goal = random(PAN_MIN, PAN_MAX);
-      tilt_goal = random(TILT_MIN, TILT_MAX);
-      dazer_speed = random(SPEED_MIN, SPEED_MAX);
-}
 
 
 
