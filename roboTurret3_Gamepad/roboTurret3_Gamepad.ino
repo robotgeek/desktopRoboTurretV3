@@ -7,7 +7,7 @@
  *   _|_______|____|_                                      _|___|_______|_
  *
  *  The following sketch will allow you to control a Desktop RobotTurret v3 using
- *  an IR Gamepad.
+ *  the IR Gamepad.
  *
  *  Wiring:
  *    Pan Servo - Digital Pin 10
@@ -19,6 +19,7 @@
  *    Up and Down control tilt angle
  *    Left and Right control pan angle
  *    Select toggles Laser output
+ *    Start re-centers both pan and tilt servos
  *    B and TA (left and right buttons) control pan movement rate
  *    A and TB (botton and top buttons) control tilt movement rate
  ***********************************************************************************/
@@ -98,6 +99,10 @@ void loop()
     if ( myGamepad.button_press_start() )
     {
       Serial.print( "START" );
+      tiltValue = 90;
+      panValue = 90;
+      delay(100);
+      myGamepad.update_button_states();
     }
     if ( myGamepad.button_press_select() )
     {
